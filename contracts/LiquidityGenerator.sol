@@ -129,7 +129,7 @@ contract LiquidityGenerator {
         admin = pendingAdmin;
         pendingAdmin = address(0);
         emit AdminChanged(prevAdmin, admin);
-        emit PendingAdminChanged(prevPendingAdmin, pendingAdmin)
+        emit PendingAdminChanged(prevPendingAdmin, pendingAdmin);
     }
 
     function setReserveManager(address reserveManager_) external {
