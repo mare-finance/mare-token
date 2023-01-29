@@ -3,6 +3,7 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { expect } from 'chai'
 import { BigNumber, Contract } from 'ethers'
 import { ethers } from 'hardhat'
+import { getTokenContract } from './_utils'
 
 const mantissa = ethers.utils.parseEther('1')
 const mareAmount = ethers.utils.parseEther('2500000')
@@ -33,7 +34,7 @@ const deployFixture = async () => {
 
     // Mare
     const mare = await getTokenContract({
-        adminAddress: admin.address,
+        admin: admin,
         mintAmount: ethers.utils.parseEther('100000000'),
         existingAddress: mareAddress,
         whaleAddress: '0xfb59ce8986943163f14c590755b29db2998f2322',
@@ -42,7 +43,7 @@ const deployFixture = async () => {
 
     // USDC
     const usdc = await getTokenContract({
-        adminAddress: admin.address,
+        admin: admin,
         mintAmount: ethers.utils.parseEther('100000'),
         existingAddress: usdcAddress,
         whaleAddress: '0xebe80f029b1c02862b9e8a70a7e5317c06f62cae',
@@ -357,39 +358,6 @@ describe.skip('Liquidity Generator Live', function () {
         )
     })
 })
-
-const getTokenContract = async (opts: {
-    adminAddress: string
-    mintAmount?: BigNumber
-    existingAddress?: string
-    whaleAddress?: string
-    decimals?: string
-}) => {
-    if (opts.existingAddress) {
-        const token = await ethers.getContractAt(
-            'MockERC20Token',
-            opts.existingAddress,
-        )
-
-        if (opts.whaleAddress) {
-            const whale = await ethers.getSigner(opts.whaleAddress)
-
-            const balance = await token.balanceOf(whale.address)
-            await (
-                await token.connect(whale).transfer(opts.adminAddress, balance)
-            ).wait(1)
-        }
-
-        return token
-    } else {
-        const Token = await ethers.getContractFactory('MockERC20Token')
-        const token = await Token.deploy(
-            opts.mintAmount || ethers.utils.parseEther('100000000'),
-            18,
-        )
-        return token
-    }
-}
 
 const depositParticipant = async (
     participant: SignerWithAddress,

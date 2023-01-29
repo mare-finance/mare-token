@@ -3,6 +3,7 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { expect } from 'chai'
 import { BigNumber } from 'ethers'
 import { ethers } from 'hardhat'
+import { getTokenContract } from './_utils'
 
 const adminAddress = '0x8EA3504810baf96D6c9cd4872d70487B5b2B7C1B'
 const mareAddress = '0x1DB2466d9F5e10D7090E7152B68d62703a2245F0'
@@ -208,35 +209,4 @@ describe('Vester Cliff', function () {
     })
 })
 
-const getTokenContract = async (opts: {
-    admin: SignerWithAddress
-    mintAmount?: BigNumber
-    existingAddress?: string
-    whaleAddress?: string
-    decimals?: string
-}) => {
-    if (opts.existingAddress) {
-        const token = await ethers.getContractAt(
-            'MockERC20Token',
-            opts.existingAddress,
-        )
 
-        if (opts.whaleAddress) {
-            const whale = await ethers.getSigner(opts.whaleAddress)
-
-            const balance = await token.balanceOf(whale.address)
-            await (
-                await token.connect(whale).transfer(opts.admin.address, balance)
-            ).wait(1)
-        }
-
-        return token
-    } else {
-        const Token = await ethers.getContractFactory('MockERC20Token')
-        const token = await Token.connect(opts.admin).deploy(
-            opts.mintAmount || ethers.utils.parseEther('100000000'),
-            18,
-        )
-        return token
-    }
-}

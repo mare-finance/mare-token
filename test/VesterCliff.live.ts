@@ -2,6 +2,7 @@ import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 import { expect } from 'chai'
 import { BigNumber } from 'ethers'
 import { ethers } from 'hardhat'
+import { getTokenContract } from './_utils'
 
 const mareAddress = '0x1DB2466d9F5e10D7090E7152B68d62703a2245F0'
 const multiSigAddress = '0x784B82a27029C9E114b521abcC39D02B3D1DEAf2'
@@ -46,7 +47,7 @@ const deployFixture = async () => {
     // Mare
 
     const mare = await getTokenContract({
-        adminAddress: admin.address,
+        admin: admin,
         mintAmount: ethers.utils.parseEther('12000000'),
         existingAddress: mareAddress,
         whaleAddress: multiSigAddress,
@@ -148,36 +149,3 @@ describe.skip('Vester Cliff Live', function () {
         expect(await mare.balanceOf(vesterCliff.address)).to.equal(0)
     })
 })
-
-const getTokenContract = async (opts: {
-    adminAddress: string
-    mintAmount?: BigNumber
-    existingAddress?: string
-    whaleAddress?: string
-    decimals?: string
-}) => {
-    if (opts.existingAddress) {
-        const token = await ethers.getContractAt(
-            'MockERC20Token',
-            opts.existingAddress,
-        )
-
-        if (opts.whaleAddress) {
-            const whale = await ethers.getSigner(opts.whaleAddress)
-
-            const balance = await token.balanceOf(whale.address)
-            await (
-                await token.connect(whale).transfer(opts.adminAddress, balance)
-            ).wait(1)
-        }
-
-        return token
-    } else {
-        const Token = await ethers.getContractFactory('MockERC20Token')
-        const token = await Token.deploy(
-            opts.mintAmount || ethers.utils.parseEther('100000000'),
-            18,
-        )
-        return token
-    }
-}
