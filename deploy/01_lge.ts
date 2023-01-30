@@ -147,9 +147,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     await (await bonusDistributor.setAdmin(liquidityGenerator.address)).wait(1)
 }
 
-const tags = [
-    'LiquidityGenerator',
-]
+const tags = ['liquidity-generator']
 export { tags }
 
 export default func

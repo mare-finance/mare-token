@@ -16,7 +16,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     })
 }
 
-const tags = ['Token']
+const tags = ['mare-token']
 export { tags }
 
 export default func
