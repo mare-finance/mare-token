@@ -1,9 +1,9 @@
 //SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.10;
 
-import '@openzeppelin/contracts/utils/math/SafeMath.sol';
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
-import './Vester.sol';
+import "./Vester.sol";
 
 contract VesterCliff is Vester {
     using SafeMath for uint256;
@@ -18,8 +18,14 @@ contract VesterCliff is Vester {
         uint256 vestingEnd_,
         uint256 vestingCliff_
     ) Vester(mare_, recipient_, vestingAmount_, vestingBegin_, vestingEnd_) {
-        require(vestingCliff_ >= vestingBegin_, 'VesterCliff::constructor: cliff is too early');
-        require(vestingCliff_ <= vestingEnd_, 'VesterCliff::constructor: cliff is too late');
+        require(
+            vestingCliff_ >= vestingBegin_,
+            "VesterCliff::constructor: cliff is too early"
+        );
+        require(
+            vestingCliff_ <= vestingEnd_,
+            "VesterCliff::constructor: cliff is too late"
+        );
         vestingCliff = vestingCliff_;
     }
 

@@ -18,5 +18,8 @@ interface IVelodromeVoter {
         uint256[] calldata _weights
     ) external;
 
-    function votes(uint256 _tokenId, address _pool) external view returns (uint256);
+    function votes(
+        uint256 _tokenId,
+        address _pool
+    ) external view returns (uint256);
 }

@@ -18,11 +18,17 @@ interface ILiquidityGenerator {
 
     function distributorRecipients(
         address
-    ) external view returns (uint256 shares, uint256 lastShareIndex, uint256 credit);
+    )
+        external
+        view
+        returns (uint256 shares, uint256 lastShareIndex, uint256 credit);
 
     function bonusDistributorRecipients(
         address
-    ) external view returns (uint256 shares, uint256 lastShareIndex, uint256 credit);
+    )
+        external
+        view
+        returns (uint256 shares, uint256 lastShareIndex, uint256 credit);
 
     function deposit() external payable;
 
@@ -36,6 +42,9 @@ interface ILiquidityGenerator {
         uint256 newShares,
         uint256 newBonusShares
     );
-    event PostponeUnlockTimestamp(uint256 prevUnlockTimestamp, uint256 unlockTimestamp);
+    event PostponeUnlockTimestamp(
+        uint256 prevUnlockTimestamp,
+        uint256 unlockTimestamp
+    );
     event Delivered(uint256 amountPair0, uint256 amountPair1);
 }

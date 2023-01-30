@@ -1,14 +1,14 @@
 //SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.10;
 
-import './interfaces/IERC20.sol';
-import './interfaces/IOwnedDistributor.sol';
-import './interfaces/IVelodromeGauge.sol';
-import './interfaces/IVelodromePairFactory.sol';
-import './interfaces/IVelodromeRouter.sol';
-import './interfaces/IVelodromeVoter.sol';
-import './libraries/SafeMath.sol';
-import './libraries/SafeToken.sol';
+import "./interfaces/IERC20.sol";
+import "./interfaces/IOwnedDistributor.sol";
+import "./interfaces/IVelodromeGauge.sol";
+import "./interfaces/IVelodromePairFactory.sol";
+import "./interfaces/IVelodromeRouter.sol";
+import "./interfaces/IVelodromeVoter.sol";
+import "./libraries/SafeMath.sol";
+import "./libraries/SafeToken.sol";
 
 contract LiquidityGenerator {
     using SafeMath for uint256;
@@ -53,8 +53,14 @@ contract LiquidityGenerator {
     address public immutable gauge;
 
     event AdminChanged(address prevAdmin, address newAdmin);
-    event PendingAdminChanged(address prevPendingAdmin, address newPendingAdmin);
-    event ReservesManagerChanged(address prevReservesManager, address newReservesManager);
+    event PendingAdminChanged(
+        address prevPendingAdmin,
+        address newPendingAdmin
+    );
+    event ReservesManagerChanged(
+        address prevReservesManager,
+        address newReservesManager
+    );
     event Finalized(uint256 amountMare, uint256 amountUSDC);
     event Deposit(
         address indexed sender,
@@ -64,15 +70,22 @@ contract LiquidityGenerator {
         uint256 newShares,
         uint256 newBonusShares
     );
-    event PostponeUnlockTimestamp(uint256 prevUnlockTimestamp, uint256 unlockTimestamp);
+    event PostponeUnlockTimestamp(
+        uint256 prevUnlockTimestamp,
+        uint256 unlockTimestamp
+    );
     event Delivered(uint256 amountPair0);
     event VeloRewardClaimed(uint256 amountVelo);
 
     constructor(ConstuctorParams memory params_) {
-        require(params_.periodDuration_ > 0, 'LiquidityGenerator: INVALID_PERIOD_DURATION');
         require(
-            params_.bonusDuration_ > 0 && params_.bonusDuration_ <= params_.periodDuration_,
-            'LiquidityGenerator: INVALID_BONUS_DURATION'
+            params_.periodDuration_ > 0,
+            "LiquidityGenerator: INVALID_PERIOD_DURATION"
+        );
+        require(
+            params_.bonusDuration_ > 0 &&
+                params_.bonusDuration_ <= params_.periodDuration_,
+            "LiquidityGenerator: INVALID_BONUS_DURATION"
         );
         admin = params_.admin_;
         mare = params_.mare_;
@@ -87,43 +100,63 @@ contract LiquidityGenerator {
         periodEnd = params_.periodBegin_.add(params_.periodDuration_);
         bonusEnd = params_.periodBegin_.add(params_.bonusDuration_);
 
-        address _pair0 = _createPair(params_.router0_, params_.mare_, params_.usdc_);
+        address _pair0 = _createPair(
+            params_.router0_,
+            params_.mare_,
+            params_.usdc_
+        );
         address _gauge = _createGauge(params_.voter_, _pair0);
 
         pair0 = _pair0;
         gauge = _gauge;
     }
 
-    function distributorTotalShares() public view returns (uint256 totalShares) {
+    function distributorTotalShares()
+        public
+        view
+        returns (uint256 totalShares)
+    {
         return IOwnedDistributor(distributor).totalShares();
     }
 
-    function bonusDistributorTotalShares() public view returns (uint256 totalShares) {
+    function bonusDistributorTotalShares()
+        public
+        view
+        returns (uint256 totalShares)
+    {
         return IOwnedDistributor(bonusDistributor).totalShares();
     }
 
     function distributorRecipients(
         address account
-    ) public view returns (uint256 shares, uint256 lastShareIndex, uint256 credit) {
+    )
+        public
+        view
+        returns (uint256 shares, uint256 lastShareIndex, uint256 credit)
+    {
         return IOwnedDistributor(distributor).recipients(account);
     }
 
     function bonusDistributorRecipients(
         address account
-    ) public view returns (uint256 shares, uint256 lastShareIndex, uint256 credit) {
+    )
+        public
+        view
+        returns (uint256 shares, uint256 lastShareIndex, uint256 credit)
+    {
         return IOwnedDistributor(bonusDistributor).recipients(account);
     }
 
     function setAdmin(address admin_) external {
-        require(msg.sender == admin, 'LiquidityGenerator: FORBIDDEN');
-        require(admin_ != address(0), 'LiquidityGenerator: INVALID_ADDRESS');
+        require(msg.sender == admin, "LiquidityGenerator: FORBIDDEN");
+        require(admin_ != address(0), "LiquidityGenerator: INVALID_ADDRESS");
         address prevPendingAdmin = pendingAdmin;
         pendingAdmin = admin_;
         emit PendingAdminChanged(prevPendingAdmin, pendingAdmin);
     }
 
     function acceptAdmin() external {
-        require(msg.sender == pendingAdmin, 'LiquidityGenerator: FORBIDDEN');
+        require(msg.sender == pendingAdmin, "LiquidityGenerator: FORBIDDEN");
         address prevAdmin = admin;
         address prevPendingAdmin = pendingAdmin;
         admin = pendingAdmin;
@@ -133,18 +166,21 @@ contract LiquidityGenerator {
     }
 
     function setReserveManager(address reserveManager_) external {
-        require(msg.sender == admin, 'LiquidityGenerator: FORBIDDEN');
-        require(reserveManager_ != address(0), 'LiquidityGenerator: INVALID_ADDRESS');
+        require(msg.sender == admin, "LiquidityGenerator: FORBIDDEN");
+        require(
+            reserveManager_ != address(0),
+            "LiquidityGenerator: INVALID_ADDRESS"
+        );
         address prevReservesManager = reservesManager;
         reservesManager = reserveManager_;
         emit ReservesManagerChanged(prevReservesManager, reservesManager);
     }
 
     function postponeUnlockTimestamp(uint256 newUnlockTimestamp) public {
-        require(msg.sender == admin, 'LiquidityGenerator: UNAUTHORIZED');
+        require(msg.sender == admin, "LiquidityGenerator: UNAUTHORIZED");
         require(
             newUnlockTimestamp > unlockTimestamp,
-            'LiquidityGenerator: INVALID_UNLOCK_TIMESTAMP'
+            "LiquidityGenerator: INVALID_UNLOCK_TIMESTAMP"
         );
         uint256 prevUnlockTimestamp = unlockTimestamp;
         unlockTimestamp = newUnlockTimestamp;
@@ -152,11 +188,14 @@ contract LiquidityGenerator {
     }
 
     function deliverLiquidityToReservesManager() public {
-        require(msg.sender == admin, 'LiquidityGenerator: UNAUTHORIZED');
-        require(!delivered, 'LiquidityGenerator: ALREADY_DELIVERED');
-        require(finalized, 'LiquidityGenerator: NOT_FINALIZED');
+        require(msg.sender == admin, "LiquidityGenerator: UNAUTHORIZED");
+        require(!delivered, "LiquidityGenerator: ALREADY_DELIVERED");
+        require(finalized, "LiquidityGenerator: NOT_FINALIZED");
         uint256 blockTimestamp = getBlockTimestamp();
-        require(blockTimestamp >= unlockTimestamp, 'LiquidityGenerator: STILL_LOCKED');
+        require(
+            blockTimestamp >= unlockTimestamp,
+            "LiquidityGenerator: STILL_LOCKED"
+        );
         IVelodromeGauge(gauge).withdrawAll();
         uint256 _amountPair0 = pair0.myBalance();
         pair0.safeTransfer(reservesManager, _amountPair0);
@@ -165,8 +204,8 @@ contract LiquidityGenerator {
     }
 
     function claimVeloRewards() public {
-        require(msg.sender == admin, 'LiquidityGenerator: UNAUTHORIZED');
-        require(finalized, 'LiquidityGenerator: NOT_FINALIZED');
+        require(msg.sender == admin, "LiquidityGenerator: UNAUTHORIZED");
+        require(finalized, "LiquidityGenerator: NOT_FINALIZED");
 
         address[] memory tokens = new address[](1);
         tokens[0] = velo;
@@ -178,9 +217,9 @@ contract LiquidityGenerator {
     }
 
     function finalize() public {
-        require(!finalized, 'LiquidityGenerator: FINALIZED');
+        require(!finalized, "LiquidityGenerator: FINALIZED");
         uint256 blockTimestamp = getBlockTimestamp();
-        require(blockTimestamp >= periodEnd, 'LiquidityGenerator: TOO_SOON');
+        require(blockTimestamp >= periodEnd, "LiquidityGenerator: TOO_SOON");
 
         uint256 _amountMare = mare.myBalance();
         uint256 _amountUSDC = usdc.myBalance();
@@ -210,20 +249,26 @@ contract LiquidityGenerator {
 
     function deposit(uint256 amountUSDC) external payable {
         uint256 blockTimestamp = getBlockTimestamp();
-        require(blockTimestamp >= periodBegin, 'LiquidityGenerator: TOO_SOON');
-        require(blockTimestamp < periodEnd, 'LiquidityGenerator: TOO_LATE');
-        require(amountUSDC >= 1e7, 'LiquidityGenerator: INVALID_VALUE'); // minimum 10 USDC
+        require(blockTimestamp >= periodBegin, "LiquidityGenerator: TOO_SOON");
+        require(blockTimestamp < periodEnd, "LiquidityGenerator: TOO_LATE");
+        require(amountUSDC >= 1e7, "LiquidityGenerator: INVALID_VALUE"); // minimum 10 USDC
 
         // Pull usdc to this contract
         usdc.safeTransferFrom(msg.sender, address(this), amountUSDC);
 
-        (uint256 _prevSharesBonus, , ) = IOwnedDistributor(bonusDistributor).recipients(msg.sender);
+        (uint256 _prevSharesBonus, , ) = IOwnedDistributor(bonusDistributor)
+            .recipients(msg.sender);
         uint256 _newSharesBonus = _prevSharesBonus;
         if (blockTimestamp < bonusEnd) {
             _newSharesBonus = _prevSharesBonus.add(amountUSDC);
-            IOwnedDistributor(bonusDistributor).editRecipient(msg.sender, _newSharesBonus);
+            IOwnedDistributor(bonusDistributor).editRecipient(
+                msg.sender,
+                _newSharesBonus
+            );
         }
-        (uint256 _prevShares, , ) = IOwnedDistributor(distributor).recipients(msg.sender);
+        (uint256 _prevShares, , ) = IOwnedDistributor(distributor).recipients(
+            msg.sender
+        );
         uint256 _newShares = _prevShares.add(amountUSDC);
         IOwnedDistributor(distributor).editRecipient(msg.sender, _newShares);
         emit Deposit(
@@ -237,24 +282,39 @@ contract LiquidityGenerator {
     }
 
     receive() external payable {
-        revert('LiquidityGenerator: BAD_CALL');
+        revert("LiquidityGenerator: BAD_CALL");
     }
 
     function getBlockTimestamp() public view virtual returns (uint256) {
         return block.timestamp;
     }
 
-    function _createPair(address router_, address mare_, address usdc_) internal returns (address) {
+    function _createPair(
+        address router_,
+        address mare_,
+        address usdc_
+    ) internal returns (address) {
         address _veloPairFactory = IVelodromeRouter(router_).factory();
-        address _pair = IVelodromePairFactory(_veloPairFactory).getPair(mare_, usdc_, false);
+        address _pair = IVelodromePairFactory(_veloPairFactory).getPair(
+            mare_,
+            usdc_,
+            false
+        );
         if (_pair != address(0)) return _pair;
 
-        _pair = IVelodromePairFactory(_veloPairFactory).createPair(mare_, usdc_, false);
+        _pair = IVelodromePairFactory(_veloPairFactory).createPair(
+            mare_,
+            usdc_,
+            false
+        );
 
         return _pair;
     }
 
-    function _createGauge(address voter_, address pair0_) internal returns (address) {
+    function _createGauge(
+        address voter_,
+        address pair0_
+    ) internal returns (address) {
         address _gauge = IVelodromeVoter(voter_).gauges(pair0_);
         if (_gauge != address(0)) return _gauge;
 
