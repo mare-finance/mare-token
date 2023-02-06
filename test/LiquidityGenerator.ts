@@ -15,8 +15,8 @@ const bonusDuration = 1 * 24 * 60 * 60; // 1 day
 const vestingBeginGap = 30 * 60; // 30 minutes
 const vestingDuration = 1 * 360 * 24 * 60 * 60; // 1 year
 
-let mareAddress = "0x1db2466d9f5e10d7090e7152b68d62703a2245f0";
-let usdcAddress = "0x7f5c764cbc14f9669b88837ca1490cca17c31607";
+let usdcAddress = "0x43D8814FdFB9B8854422Df13F1c66e34E4fa91fD";
+let usdcWhaleAddress = "0x446CdC0cFdbf8707F9b67bf3F9d83Bb46B9d3712";
 
 const deployFixture = async () => {
     // Accounts
@@ -33,8 +33,6 @@ const deployFixture = async () => {
     const mare = await getTokenContract({
         admin: admin,
         mintAmount: ethers.utils.parseEther("100000000"),
-        existingAddress: mareAddress,
-        whaleAddress: "0xfb59ce8986943163f14c590755b29db2998f2322",
         decimals: "18",
     });
 
@@ -43,7 +41,7 @@ const deployFixture = async () => {
         admin: admin,
         mintAmount: ethers.utils.parseEther("100000"),
         existingAddress: usdcAddress,
-        whaleAddress: "0xebe80f029b1c02862b9e8a70a7e5317c06f62cae",
+        whaleAddress: usdcWhaleAddress,
         decimals: "6",
     });
 
@@ -194,7 +192,7 @@ const deployFixture = async () => {
     };
 };
 
-describe.skip("Liquidity Generator", function () {
+describe("Liquidity Generator", function () {
     it("Should deploy the liquidity generation contract", async function () {
         const deployment = await loadFixture(deployFixture);
         const { liquidityGenerator, pair } = deployment;
