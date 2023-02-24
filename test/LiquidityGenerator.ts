@@ -3,6 +3,7 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
 import { ethers } from "hardhat";
+import hre from "hardhat";
 import { getTokenContract } from "./_utils";
 
 const mantissa = ethers.utils.parseEther("1");
@@ -15,13 +16,13 @@ const bonusDuration = 1 * 24 * 60 * 60; // 1 day
 const vestingBeginGap = 30 * 60; // 30 minutes
 const vestingDuration = 1 * 360 * 24 * 60 * 60; // 1 year
 
-let usdcAddress = "0x43D8814FdFB9B8854422Df13F1c66e34E4fa91fD";
-let usdcWhaleAddress = "0x446CdC0cFdbf8707F9b67bf3F9d83Bb46B9d3712";
-
 const deployFixture = async () => {
     // Accounts
     const [admin, reservesManager, participant1, participant2] =
         await ethers.getSigners();
+
+    const addresses = hre.network.config.addresses;
+    if (!addresses) throw new Error("No addresses in config");
 
     // Times
     const periodBegin = (await ethers.provider.getBlock("latest")).timestamp;
@@ -40,8 +41,8 @@ const deployFixture = async () => {
     const usdc = await getTokenContract({
         admin: admin,
         mintAmount: ethers.utils.parseEther("100000"),
-        existingAddress: usdcAddress,
-        whaleAddress: usdcWhaleAddress,
+        existingAddress: addresses.usdc,
+        whaleAddress: addresses.usdcWhale,
         decimals: "6",
     });
 
@@ -86,19 +87,19 @@ const deployFixture = async () => {
     // Velodrome Contracts
     const velo = await ethers.getContractAt(
         "./contracts/interfaces/IERC20.sol:IERC20",
-        "0x3c8B650257cFb5f272f799F5e2b4e65093a11a05"
+        addresses.velo
     );
     const router = await ethers.getContractAt(
         "IVelodromeRouter",
-        "0x9c12939390052919af3155f41bf4160fd3666a6f"
+        addresses.router
     );
     const voter = await ethers.getContractAt(
         "IVelodromeVoter",
-        "0x09236cfF45047DBee6B921e00704bed6D6B8Cf7e"
+        addresses.voter
     );
     const veNFT = await ethers.getContractAt(
         "IVelodromeVotingEscrow",
-        "0x9c7305eb78a432ced5c4d14cac27e8ed569a2e26"
+        addresses.veNFT
     );
 
     // Liquidity Generator

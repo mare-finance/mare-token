@@ -5,20 +5,20 @@ import { HardhatNetworkConfig, HardhatRuntimeEnvironment } from "hardhat/types";
 const liquidityAmount = ethers.utils.parseEther("2500000");
 const vestingAmount = ethers.utils.parseEther("3200000");
 const bonusVestingAmount = ethers.utils.parseEther("300000");
-const periodBegin = 1664139600; // 2022-06-25 9:00:00 PM UTC
+const periodBegin = 1677445200; // 2023-02-26 9:00:00 PM UTC
 const periodDuration = 3 * 24 * 60 * 60; // 3 days
 const bonusDuration = 1 * 24 * 60 * 60; // 1 day
-const vestingBegin = 1664409600; // 2022-09-29 12:00:00 AM UTC
+const vestingBegin = 1664409600; // 2023-02-28 12:00:00 AM UTC
 const vestingDuration = 1 * 365 * 24 * 60 * 60; // 1 year
-const veloAddress = "0x3c8B650257cFb5f272f799F5e2b4e65093a11a05";
-const veloRouterAddress = "0x9c12939390052919af3155f41bf4160fd3666a6f";
-const veloVoter = "0x09236cfF45047DBee6B921e00704bed6D6B8Cf7e";
-const usdcAddress = "0x7f5c764cbc14f9669b88837ca1490cca17c31607";
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     if (hre.network.name !== "localhost") {
         return;
     }
+
+    const addresses = hre.network.config.addresses;
+    if (!addresses) throw new Error("No addresses in config");
+
     const {
         deployments: { deploy, get },
         getNamedAccounts,
@@ -38,7 +38,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     // USDC
     const usdc = await ethers.getContractAt(
         "contracts/interfaces/IERC20.sol:IERC20",
-        usdcAddress
+        addresses.usdc
     );
 
     // Distributor
@@ -103,13 +103,16 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
     const velo = await ethers.getContractAt(
         "./contracts/interfaces/IERC20.sol:IERC20",
-        veloAddress
+        addresses.velo
     );
     const router = await ethers.getContractAt(
         "IVelodromeRouter",
-        veloRouterAddress
+        addresses.router
     );
-    const voter = await ethers.getContractAt("IVelodromeVoter", veloVoter);
+    const voter = await ethers.getContractAt(
+        "IVelodromeVoter",
+        addresses.voter
+    );
 
     const liquidityGeneratorDeploy = await deploy("LiquidityGenerator", {
         from: admin.address,
