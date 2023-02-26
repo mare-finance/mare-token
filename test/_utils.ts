@@ -2,6 +2,12 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
 
+const soMath = {
+    clamp(num: number, min: number, max: number) {
+        return num <= min ? min : num >= max ? max : num;
+    },
+};
+
 const getTokenContract = async (opts: {
     admin: SignerWithAddress;
     mintAmount?: BigNumber;
@@ -16,9 +22,9 @@ const getTokenContract = async (opts: {
         );
 
         if (opts.whaleAddress) {
-            const whale = await ethers.getSigner(opts.whaleAddress);
-
+            const whale = await ethers.getImpersonatedSigner(opts.whaleAddress);
             const balance = await token.balanceOf(whale.address);
+
             await (
                 await token.connect(whale).transfer(opts.admin.address, balance)
             ).wait(1);
@@ -35,4 +41,13 @@ const getTokenContract = async (opts: {
     }
 };
 
-export { getTokenContract };
+const goToFixture = (to: number) => {
+    async function fixture() {
+        ethers.provider.send("evm_setNextBlockTimestamp", [to]);
+        await ethers.provider.send("evm_mine", []);
+    }
+
+    return fixture;
+};
+
+export { soMath, getTokenContract, goToFixture };

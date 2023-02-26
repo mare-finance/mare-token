@@ -14,7 +14,7 @@
     "license": "UNLICENSED",
     "devDependencies": {
         "@nomicfoundation/hardhat-network-helpers": "^1.0.6",
-        "@nomiclabs/hardhat-ethers": "npm:hardhat-deploy-ethers@^0.3.0-beta.13",
+        "@nomiclabs/hardhat-ethers": "^2.2.2",
         "@nomiclabs/hardhat-waffle": "^2.0.3",
         "@openzeppelin/contracts": "^4.8.0",
         "@openzeppelin/contracts-upgradeable": "^4.8.0",
@@ -30,5 +30,8 @@
         "hardhat-deploy-ethers": "^0.3.0-beta.13",
         "solidity-coverage": "^0.8.2",
         "ts-node": "^10.9.1"
+    },
+    "dependencies": {
+        "@nomicfoundation/hardhat-chai-matchers": "^1.0.6"
     }
 }

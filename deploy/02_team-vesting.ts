@@ -24,6 +24,7 @@ const recipients: any = {
 };
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
+    return false;
     const {
         deployments: { deploy, get },
         getNamedAccounts,

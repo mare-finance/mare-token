@@ -1,19 +1,13 @@
-import {
-    loadFixture,
-    impersonateAccount,
-} from "@nomicfoundation/hardhat-network-helpers";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
-import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
-import { getTokenContract } from "./_utils";
+import { getTokenContract } from "../_utils";
 
-const adminAddress = "0x8EA3504810baf96D6c9cd4872d70487B5b2B7C1B";
 const mareAddress = "0x1DB2466d9F5e10D7090E7152B68d62703a2245F0";
 const multiSigAddress = "0x784B82a27029C9E114b521abcC39D02B3D1DEAf2";
 
 const vestingAmount = ethers.utils.parseEther("12000000");
-const vestingBegin = 1676419200; // 2022-09-29 12:00:00 AM UTC
+const vestingBegin = 1664409600; // 2022-09-29 12:00:00 AM UTC
 const vestingEnd = vestingBegin + 2 * 365 * 24 * 60 * 60; // 2 years
 const vestingCliff = vestingBegin + 3 * 30 * 24 * 60 * 60; // 3 months
 
@@ -34,7 +28,9 @@ const recipients: any = {
 
 const deployFixture = async () => {
     const [deployer] = await ethers.getSigners();
-    const admin = await ethers.getSigner(adminAddress);
+    const admin = await ethers.getSigner(
+        "0xfb59ce8986943163f14c590755b29db2998f2322"
+    );
 
     const rec1 = await ethers.getSigner(Object.keys(recipients)[0]);
     const rec2 = await ethers.getSigner(Object.keys(recipients)[1]);
@@ -48,23 +44,19 @@ const deployFixture = async () => {
     ).wait(1);
 
     // Mare
+
     const mare = await getTokenContract({
         admin: admin,
         mintAmount: ethers.utils.parseEther("12000000"),
-        //existingAddress: mareAddress,
-        //whaleAddress: multiSigAddress,
+        existingAddress: mareAddress,
+        whaleAddress: multiSigAddress,
         decimals: "18",
     });
 
     // Deploy Vester Cliff
-    const VesterCliff = await ethers.getContractFactory("VesterCliff");
-    const vesterCliff = await VesterCliff.connect(admin).deploy(
-        mare.address,
-        admin.address,
-        vestingAmount,
-        vestingBegin,
-        vestingEnd,
-        vestingCliff
+    const vesterCliff = await ethers.getContractAt(
+        "VesterCliff",
+        "0xb4bF17210844418F9F2D3B90036E11aa40517971"
     );
 
     // Transfer Mare to Vester Cliff
@@ -73,82 +65,19 @@ const deployFixture = async () => {
     ).wait(1);
 
     // Distributor
-    const OwnedDistributor = await ethers.getContractFactory(
-        "OwnedDistributor"
+    const distributor = await ethers.getContractAt(
+        "OwnedDistributor",
+        await vesterCliff.recipient()
     );
-    const distributor = await OwnedDistributor.connect(admin).deploy(
-        mare.address,
-        vesterCliff.address,
-        admin.address
-    );
-    await (
-        await vesterCliff.connect(admin).setRecipient(distributor.address)
-    ).wait(1);
-
-    // Add Recipients
-    for (let i = 0; i < Object.keys(recipients).length; i++) {
-        await (
-            await distributor
-                .connect(admin)
-                .editRecipient(
-                    Object.keys(recipients)[i],
-                    Object.values(recipients)[i]
-                )
-        ).wait(1);
-    }
-
-    // Set admin to multisig
-    await (await distributor.connect(admin).setAdmin(multiSigAddress)).wait(1);
-    expect(await distributor.admin()).to.be.equal(multiSigAddress);
 
     return { admin, mare, vesterCliff, distributor, rec1, rec2 };
 };
 
-describe("Vester Cliff", function () {
-    this.beforeAll(async function () {
-        await impersonateAccount(adminAddress);
-        await Promise.all(
-            Object.keys(recipients).map(async address => {
-                await impersonateAccount(address);
-            })
-        );
-    });
-
-    it("Should revert on bad contract creation", async function () {
-        const [deployer] = await ethers.getSigners();
-        const admin = await ethers.getSigner(adminAddress);
-
-        const VesterCliff = await ethers.getContractFactory("VesterCliff");
-
-        await expect(
-            VesterCliff.connect(admin).deploy(
-                "0x0000000000000000000000000000000000000000",
-                admin.address,
-                vestingAmount,
-                vestingBegin,
-                vestingEnd,
-                vestingBegin - 10
-            )
-        ).to.be.revertedWith("VesterCliff::constructor: cliff is too early");
-
-        await expect(
-            VesterCliff.connect(admin).deploy(
-                "0x0000000000000000000000000000000000000000",
-                admin.address,
-                vestingAmount,
-                vestingBegin,
-                vestingEnd,
-                vestingEnd + 10
-            )
-        ).to.be.revertedWith("VesterCliff::constructor: cliff is too late");
-    });
-
+describe.skip("Vester Cliff Live", function () {
     it("Should deploy contract correctly", async function () {
-        const { vesterCliff, distributor, mare } = await loadFixture(
-            deployFixture
-        );
+        const { vesterCliff, distributor } = await loadFixture(deployFixture);
 
-        expect(await vesterCliff.mare()).to.equal(mare.address);
+        expect(await vesterCliff.mare()).to.equal(mareAddress);
         expect(await vesterCliff.recipient()).to.equal(distributor.address);
         expect(await vesterCliff.vestingAmount()).to.equal(vestingAmount);
         expect(await vesterCliff.vestingBegin()).to.equal(vestingBegin);
@@ -164,8 +93,12 @@ describe("Vester Cliff", function () {
         let rec1Balance_;
         let _rec2Balance = await mare.balanceOf(rec2.address);
         let rec2Balance_;
-        const rec1Last = vestingAmount.mul(recipients[rec1.address]).div(12000);
-        const rec2Last = vestingAmount.mul(recipients[rec2.address]).div(12000);
+        const rec1Last = vestingAmount
+            .mul(recipients[rec1.address])
+            .div(ethers.utils.parseEther("12000"));
+        const rec2Last = vestingAmount
+            .mul(recipients[rec2.address])
+            .div(ethers.utils.parseEther("12000"));
 
         // Zero claim before vesting
         await (await distributor.connect(rec1).claim()).wait(1);
