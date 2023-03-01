@@ -19,7 +19,7 @@ interface DeployFixture {
     }[];
 }
 
-describe.only("Owned Distributor", function () {
+describe("Owned Distributor", function () {
     const rewardPerSecond = ethers.utils.parseEther("0.01");
 
     let deployment: DeployFixture;

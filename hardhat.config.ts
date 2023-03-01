@@ -52,8 +52,8 @@ const config: HardhatUserConfig = {
             accounts: [process.env.DEPLOYER_KAVA!, process.env.RESERVES_KAVA!],
             verify: {
                 etherscan: {
-                    apiUrl: "https://explorer.kava.io/api",
-                    apiKey: "",
+                    apiUrl: "https://explorer.kava.io",
+                    apiKey: "abc",
                 },
             },
             addresses: {

@@ -2,20 +2,15 @@ import { ethers } from "hardhat";
 import { DeployFunction } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
+const mareAddress = "0xd86c8d4279ccafbec840c782bcc50d201f277419";
 const liquidityAmount = ethers.utils.parseEther("2500000");
 const vestingAmount = ethers.utils.parseEther("3200000");
 const bonusVestingAmount = ethers.utils.parseEther("300000");
-//const periodBegin = 1677445200; // 2023-02-26 9:00:00 PM UTC
-//const periodDuration = 3 * 24 * 60 * 60; // 3 days
-//const bonusDuration = 1 * 24 * 60 * 60; // 1 day
-//const vestingBegin = 1677715200; // 2023-03-02 12:00:00 AM UTC
-//const vestingDuration = 1 * 365 * 24 * 60 * 60; // 1 year
-
-const periodBegin = 1677432600; // 2023-02-26 5:30:00 PM UTC
-const periodDuration = 30 * 60 * 60; // 30 mins
-const bonusDuration = 15 * 60 * 60; // 15 mins
-const vestingBegin = 1677436200; // 2023-02-26 6:30:00 PM UTC
-const vestingDuration = 15 * 60 * 60; // 15 mins
+const periodBegin = 1677445200; // 2023-02-26 9:00:00 PM UTC
+const periodDuration = 3 * 24 * 60 * 60; // 3 days
+const bonusDuration = 1 * 24 * 60 * 60; // 1 day
+const vestingBegin = 1677715200; // 2023-03-02 12:00:00 AM UTC
+const vestingDuration = 1 * 365 * 24 * 60 * 60; // 1 year
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     const addresses = hre.network.config.addresses;
@@ -30,10 +25,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     const { adminAccount } = await getNamedAccounts();
     const admin = await ethers.getSigner(adminAccount);
 
-    const mareDeploy = await get("Mare");
     const mare = await ethers.getContractAt(
         "contracts/interfaces/IERC20.sol:IERC20",
-        mareDeploy.address
+        mareAddress
     );
 
     // USDC
@@ -53,18 +47,21 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
             vestingBegin,
             vestingEnd,
         ],
-        contract: "VesterSale",
+        contract: "contracts/VesterSale.sol:VesterSale",
     });
-    const vester = await ethers.getContractAt("Vester", vesterDeploy.address);
+    const vester = await ethers.getContractAt(
+        "VesterSale",
+        vesterDeploy.address
+    );
 
     const distributorDeploy = await deploy("Distributor", {
         from: admin.address,
         log: true,
         args: [mare.address, vester.address, admin.address],
-        contract: "OwnedDistributor",
+        contract: "contracts/OwnedDistributor.sol:OwnedDistributor",
     });
     const distributor = await ethers.getContractAt(
-        "Distributor",
+        "OwnedDistributor",
         distributorDeploy.address
     );
     await (await vester.setRecipient(distributor.address)).wait(1);
@@ -80,10 +77,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
             vestingBegin,
             vestingEnd,
         ],
-        contract: "VesterSale",
+        contract: "contracts/VesterSale.sol:VesterSale",
     });
     const bonusVester = await ethers.getContractAt(
-        "BonusVester",
+        "VesterSale",
         bonusVesterDeploy.address
     );
 
@@ -91,10 +88,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         from: admin.address,
         log: true,
         args: [mare.address, bonusVester.address, admin.address],
-        contract: "OwnedDistributor",
+        contract: "contracts/OwnedDistributor.sol:OwnedDistributor",
     });
     const bonusDistributor = await ethers.getContractAt(
-        "BonusDistributor",
+        "OwnedDistributor",
         bonusDistributorDeploy.address
     );
     await (await bonusVester.setRecipient(bonusDistributor.address)).wait(1);

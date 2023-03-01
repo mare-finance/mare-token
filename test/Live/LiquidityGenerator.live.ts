@@ -6,20 +6,18 @@ import { ethers } from "hardhat";
 import { getTokenContract } from "../_utils";
 
 const mantissa = ethers.utils.parseEther("1");
-const mareAmount = ethers.utils.parseEther("2500000");
 const vestingAmount = ethers.utils.parseEther("3200000");
 const bonusVestingAmount = ethers.utils.parseEther("300000");
 const initial = 5000;
-const periodBegin = 1664139600; // 2022-06-25 9:00:00 PM UTC
+const periodBegin = 1677445200; // 2023-02-26 9:00:00 PM UTC
 const periodDuration = 3 * 24 * 60 * 60; // 3 days
 const periodEnd = periodBegin + periodDuration;
-const bonusDuration = 1 * 24 * 60 * 60; // 1 day
-const vestingBegin = 1664409600; // 2022-09-29 12:00:00 AM UTC
+const vestingBegin = 1677715200; // 2023-03-02 12:00:00 AM UTC
 const vestingDuration = 1 * 365 * 24 * 60 * 60; // 1 year
 
-let mareAddress = "0x1db2466d9f5e10d7090e7152b68d62703a2245f0";
-let usdcAddress = "0x7f5c764cbc14f9669b88837ca1490cca17c31607";
-let lgeAddress = "0x17063Ad4e83B0aBA4ca0F3fC3a9794E807A00ED7";
+let mareAddress = "0xd86c8d4279ccafbec840c782bcc50d201f277419";
+let usdcAddress = "0xfA9343C3897324496A05fC75abeD6bAC29f8A40f";
+let lgeAddress = "0xDc3f83F046f767dd6617F93f9683882B65E02678";
 
 const deployFixture = async () => {
     // Accounts
@@ -144,7 +142,7 @@ const deployFixture = async () => {
     };
 };
 
-describe.skip("Liquidity Generator Live", function () {
+describe.only("Liquidity Generator Live", function () {
     it("Should deploy the liquidity generation contract", async function () {
         const deployment = await loadFixture(deployFixture);
         const { liquidityGenerator, pair } = deployment;
