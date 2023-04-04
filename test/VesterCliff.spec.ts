@@ -11,7 +11,7 @@ const mareAddress = "0x1DB2466d9F5e10D7090E7152B68d62703a2245F0";
 const multiSigAddress = "0x784B82a27029C9E114b521abcC39D02B3D1DEAf2";
 
 const vestingAmount = ethers.utils.parseEther("12000000");
-const vestingBegin = 1676419200; // 2022-09-29 12:00:00 AM UTC
+const vestingBegin = 1685620800; // 2023-06-01 12:00:00 AM UTC
 const vestingEnd = vestingBegin + 2 * 365 * 24 * 60 * 60; // 2 years
 const vestingCliff = vestingBegin + 3 * 30 * 24 * 60 * 60; // 3 months
 

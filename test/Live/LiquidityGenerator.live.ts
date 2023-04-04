@@ -142,7 +142,7 @@ const deployFixture = async () => {
     };
 };
 
-describe.only("Liquidity Generator Live", function () {
+describe.skip("Liquidity Generator Live", function () {
     it("Should deploy the liquidity generation contract", async function () {
         const deployment = await loadFixture(deployFixture);
         const { liquidityGenerator, pair } = deployment;

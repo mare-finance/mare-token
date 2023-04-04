@@ -33,7 +33,7 @@ interface DeployFixture {
     liquidityGenerator: Contract;
 }
 
-describe.only("Liquidity Generator", function () {
+describe("Liquidity Generator", function () {
     let deployment: DeployFixture;
 
     let participants: {
