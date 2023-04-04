@@ -24,7 +24,7 @@ const recipients: any = {
         ethers.utils.parseEther("250"),
     "0x87Cd8B143992D6BBaFb4701E8c463dF59D787568":
         ethers.utils.parseEther("500"),
-    "0xEF70c2783E81C634F2331B4aD41E547e2F704Ed1":
+    "0x969F2e54B4Aa4654F7c2f75Cbbd2d56910A1d371":
         ethers.utils.parseEther("4500"),
     "0xB58Ee267704ec4529e1B1f17B81Db73279DC4821":
         ethers.utils.parseEther("2000"),

@@ -9,7 +9,7 @@ const vestingDuration = 2 * 365 * 24 * 60 * 60; // 1 year
 const cliffDuration = 3 * 30 * 24 * 60 * 60; // 3 months
 
 const recipients: any = {
-    "0xEF70c2783E81C634F2331B4aD41E547e2F704Ed1":
+    "0x969F2e54B4Aa4654F7c2f75Cbbd2d56910A1d371":
         ethers.utils.parseEther("4500"),
     "0x40Bd6e764DBc5C7268aaC775D8978881B16221F1":
         ethers.utils.parseEther("4500"),
