@@ -4,7 +4,7 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
 
 const vestingAmount = ethers.utils.parseEther("12000000");
-const vestingBegin = 1664409600; // 2022-09-29 12:00:00 AM UTC
+const vestingBegin = 1677715200; // 2023-03-02 12:00:00 AM UTC
 const vestingDuration = 2 * 365 * 24 * 60 * 60; // 1 year
 const cliffDuration = 3 * 30 * 24 * 60 * 60; // 3 months
 

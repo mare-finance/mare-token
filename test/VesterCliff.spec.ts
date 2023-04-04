@@ -7,11 +7,10 @@ import { ethers } from "hardhat";
 import { getTokenContract } from "./_utils";
 
 const adminAddress = "0x8EA3504810baf96D6c9cd4872d70487B5b2B7C1B";
-const mareAddress = "0x1DB2466d9F5e10D7090E7152B68d62703a2245F0";
 const multiSigAddress = "0x784B82a27029C9E114b521abcC39D02B3D1DEAf2";
 
 const vestingAmount = ethers.utils.parseEther("12000000");
-const vestingBegin = 1685620800; // 2023-06-01 12:00:00 AM UTC
+const vestingBegin = 1677715200; // 2023-03-02 12:00:00 AM UTC
 const vestingEnd = vestingBegin + 2 * 365 * 24 * 60 * 60; // 2 years
 const vestingCliff = vestingBegin + 3 * 30 * 24 * 60 * 60; // 3 months
 
