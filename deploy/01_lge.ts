@@ -13,6 +13,7 @@ const vestingBegin = 1677715200; // 2023-03-02 12:00:00 AM UTC
 const vestingDuration = 1 * 365 * 24 * 60 * 60; // 1 year
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
+    return false;
     const addresses = hre.network.config.addresses;
     if (!addresses) throw new Error("No addresses in config");
 
