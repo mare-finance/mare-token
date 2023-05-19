@@ -48,7 +48,7 @@ const config: HardhatUserConfig = {
         },
         kava: {
             chainId: 2222,
-            url: "https://evm.kava.io",
+            url: "https://evm2.kava.io",
             accounts: [process.env.DEPLOYER_KAVA!, process.env.RESERVES_KAVA!],
             verify: {
                 etherscan: {

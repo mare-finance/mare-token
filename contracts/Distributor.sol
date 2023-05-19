@@ -9,6 +9,8 @@ import "./interfaces/IClaimable.sol";
 abstract contract Distributor is IClaimable {
     using SafeMath for uint256;
 
+    uint256 public constant MANTISSA2 = 2 ** 160;
+
     address public immutable mare;
     address public immutable claimable;
 
@@ -48,7 +50,8 @@ abstract contract Distributor is IClaimable {
         if (totalShares == 0) return shareIndex;
         uint256 amount = IClaimable(claimable).claim();
         if (amount == 0) return shareIndex;
-        _shareIndex = amount.mul(2 ** 160).div(totalShares).add(shareIndex);
+
+        _shareIndex = amount.mul(MANTISSA2).div(totalShares).add(shareIndex);
         shareIndex = _shareIndex;
         emit UpdateShareIndex(_shareIndex);
     }
@@ -60,7 +63,7 @@ abstract contract Distributor is IClaimable {
         credit =
             recipient.credit +
             _shareIndex.sub(recipient.lastShareIndex).mul(recipient.shares) /
-            2 ** 160;
+            MANTISSA2;
         recipient.lastShareIndex = _shareIndex;
         recipient.credit = credit;
         emit UpdateCredit(account, _shareIndex, credit);

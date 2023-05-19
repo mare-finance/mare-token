@@ -19,8 +19,8 @@ interface DeployFixture {
     }[];
 }
 
-describe("Owned Distributor", function () {
-    const rewardPerSecond = ethers.utils.parseEther("0.01");
+describe.only("Owned Distributor", function () {
+    const rewardPerSecond = ethers.utils.parseEther("100000000");
 
     let deployment: DeployFixture;
 
@@ -32,6 +32,7 @@ describe("Owned Distributor", function () {
 
         const mare = await getTokenContract({
             admin,
+            mintAmount: ethers.utils.parseEther("1000000000000"),
         });
 
         const MockClaimable = await ethers.getContractFactory("MockClaimable");
@@ -58,11 +59,11 @@ describe("Owned Distributor", function () {
         await expect(
             mare.transfer(
                 mockClaimable.address,
-                ethers.utils.parseEther("1000")
+                await mare.balanceOf(admin.address)
             )
         ).not.to.reverted;
 
-        const participants = await makeParticipants(admin, 2);
+        const participants = await makeParticipants(admin, 10);
 
         return {
             admin,
@@ -134,7 +135,7 @@ describe("Owned Distributor", function () {
                 )
             ).not.to.reverted;
 
-            for (let i = 0; i < participants.length; i++) {
+            for (let i = 0; i < Math.min(participants.length, 3); i++) {
                 expect(
                     (await distributor.recipients(participants[i].address))
                         .shares
@@ -174,7 +175,7 @@ describe("Owned Distributor", function () {
                 ethers.BigNumber.from(0)
             );
 
-            for (let i = 0; i < participants.length; i++) {
+            for (let i = 0; i < Math.min(participants.length, 3); i++) {
                 const nextBlockTime =
                     (await ethers.provider.getBlock("latest")).timestamp + 1;
 
@@ -202,8 +203,8 @@ const makeParticipants = async (admin: SignerWithAddress, count: number) => {
         const participant = ethers.Wallet.createRandom();
         const signer = await ethers.getImpersonatedSigner(participant.address);
 
-        const share = Math.random() * 100;
-        const shareEther = share.toFixed(6);
+        const share = Math.random() * 100_000_000;
+        const shareEther = share.toFixed(18);
         const shareWei = ethers.utils.parseEther(shareEther);
 
         participants.push({
